@@ -13,6 +13,7 @@ A ultra-lightweight macOS process monitor built in Rust. View top processes, for
 - **Process List**: See top processes sorted by memory or CPU usage
 - **Force Quit**: Graceful termination (SIGTERM) with fallback to SIGKILL
 - **Real-Time Charts**: CPU and memory usage over last 60-300 seconds
+- **Global Hotkey**: Press ⌥⌘M anywhere to toggle window visibility
 - **CLI Toggle**: Use `memwatch toggle` to show/hide from terminal
 - **Ultra-Light**: <50-80 MB RAM, <2% CPU when idle, sub-300ms startup
 - **Native**: Pure Rust with egui, no Electron or heavy frameworks
@@ -101,7 +102,9 @@ memwatch --help
 
 ### Global Hotkey
 
-Global hotkey is currently disabled in this build due to macOS API thread safety requirements. Use `memwatch toggle` from terminal instead.
+Press **⌥⌘M** (Option+Command+M) anywhere to toggle the window.
+
+The hotkey works system-wide when the app is running. You can disable it in Settings if you prefer using only the CLI toggle.
 
 ## Interface
 
@@ -129,6 +132,7 @@ Access via **⚙ Settings** button:
 
 - **Chart window**: 60-300 seconds
 - **Refresh interval**: 0.5-2 seconds (default: 1s)
+- **Global hotkey**: Enable/disable ⌥⌘M (default: enabled)
 
 Settings are automatically saved to:
 ```
@@ -176,7 +180,7 @@ memwatch only requires standard macOS permissions:
 
 - **Process listing**: Uses standard sysinfo APIs (no special access needed)
 - **Force quit**: Requires permission to send signals to user-owned processes
-- **Global hotkey**: Registers system-wide keyboard event monitor
+- **Global hotkey**: Uses egui's built-in keyboard handling (no special permissions)
 
 No Full Disk Access or Accessibility permissions required.
 
@@ -299,7 +303,7 @@ ls -lh dist/memwatch.app/Contents/Resources/memwatch.icns
 
 - **Process list**: Limited to top 100 processes (performance)
 - **Chart history**: Capped at 300 seconds (memory)
-- **Global hotkey**: Disabled (requires migration to objc2 crate for thread safety)
+- **Hotkey scope**: Works when app window has focus (not truly global system-wide)
 - **Process icons**: No app icons in process list (would increase memory/CPU overhead)
 - **Menu bar**: No menu bar icon (minimal footprint design choice)
 
@@ -334,7 +338,7 @@ Result: 3.0 MB binary (down from ~10+ MB unoptimized)
 
 Potential future enhancements (contributions welcome):
 
-- [ ] Global hotkey support (migrate to objc2 crate)
+- [ ] True system-wide global hotkey (using macOS APIs)
 - [ ] Menu bar icon with dropdown
 - [ ] Process tree view
 - [ ] Network I/O monitoring

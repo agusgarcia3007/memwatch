@@ -52,20 +52,25 @@ A fully functional, ultra-lightweight macOS process monitor in Rust with the fol
    - Generated using native macOS tools (no external dependencies)
    - 29 KB total size
 
-### ⚠️ Known Issue: Global Hotkey
+### ✅ Hotkey Implementation
 
-**Status**: Disabled in current build
+**Status**: Implemented and working
 
-**Reason**: The `cocoa` crate (0.26) is deprecated and has thread safety issues with modern Rust. Specifically:
-- `*mut objc::runtime::Object` is not `Send`
-- Cannot safely spawn threads that interact with Cocoa event monitors
-- Block closures with variadic C functions are incompatible with Rust's type system
+**Implementation**: Uses egui's built-in keyboard event system
+- Detects ⌥⌘M (Option+Command+M) combination
+- Works when application window has focus
+- No external dependencies required
+- Cross-platform compatible (though primarily for macOS)
 
-**Solution Path**:
-The global hotkey feature would need to be reimplemented using the modern `objc2` and `objc2-app-kit` crates, which provide proper thread safety and Send/Sync implementations. This was deemed out of scope for the initial build to maintain the "ultra-light" goal and avoid additional complexity.
+**Limitation**: Not truly "global" (system-wide)
+- Only works when the app window is focused or visible
+- For true global hotkey, would need macOS-specific APIs (NSEvent global monitor)
+- Current approach keeps the app lightweight and dependency-free
 
-**Workaround**:
-Users can use `memwatch toggle` from terminal or create a shell alias/keyboard shortcut at the OS level.
+**Alternative**: CLI toggle works system-wide
+- `memwatch toggle` command works from anywhere
+- Can be bound to keyboard shortcuts at OS level
+- Uses Unix socket for instant communication
 
 ## Performance Metrics
 

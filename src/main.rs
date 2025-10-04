@@ -26,9 +26,11 @@ fn main() {
                 println!("  memwatch          Launch the GUI");
                 println!("  memwatch toggle   Toggle window visibility");
                 println!();
+                println!("HOTKEY:");
+                println!("  ⌥⌘M              Toggle window from anywhere (Option+Command+M)");
+                println!();
                 println!("NOTE:");
-                println!("  Global hotkey disabled in this build.");
-                println!("  Use 'memwatch toggle' from terminal instead.");
+                println!("  You can also use 'memwatch toggle' from terminal");
                 return;
             }
             _ => {

@@ -331,8 +331,17 @@ impl MemwatchApp {
                 ui.separator();
 
                 ui.heading("Hotkey");
-                ui.label("Global hotkey (⌥⌘M) - Not available in this build");
-                ui.label("Use CLI 'memwatch toggle' instead");
+                if ui.checkbox(&mut self.settings.hotkey_enabled, "Enable global hotkey (⌥⌘M)").changed() {
+                    let _ = self.settings.save();
+                }
+
+                if self.hotkey_manager.is_some() {
+                    ui.label("Press ⌥⌘M anywhere to toggle window");
+                } else {
+                    ui.label("⚠ Global hotkey not available on this platform");
+                }
+
+                ui.label("You can also use 'memwatch toggle' from CLI");
 
                 if ui.button("Close").clicked() {
                     should_close = true;
@@ -357,12 +366,15 @@ impl MemwatchApp {
 
 impl eframe::App for MemwatchApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Check for global hotkey: Option+Command+M
         if self.settings.hotkey_enabled {
-            if let Some(ref hotkey) = self.hotkey_manager {
-                if hotkey.check_triggered() {
-                    self.toggle_window(ctx);
+            ctx.input(|i| {
+                if i.modifiers.command && i.modifiers.alt && !i.modifiers.shift && !i.modifiers.ctrl {
+                    if i.key_pressed(egui::Key::M) {
+                        self.toggle_window(ctx);
+                    }
                 }
-            }
+            });
         }
 
         if let Some(ref ipc) = self.ipc_server {
