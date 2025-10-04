@@ -1,6 +1,12 @@
 # memwatch
 
+<p align="center">
+  <img src="memwatch.icns" alt="memwatch icon" width="128" height="128">
+</p>
+
 A ultra-lightweight macOS process monitor built in Rust. View top processes, force-quit them, and monitor real-time system resources — all with minimal overhead.
+
+**⚡️ Fast** • **🪶 Lightweight** • **🎯 Native** • **🔒 Secure**
 
 ## Features
 
@@ -11,10 +17,20 @@ A ultra-lightweight macOS process monitor built in Rust. View top processes, for
 - **Ultra-Light**: <50-80 MB RAM, <2% CPU when idle, sub-300ms startup
 - **Native**: Pure Rust with egui, no Electron or heavy frameworks
 
+## Why memwatch?
+
+Unlike Activity Monitor or heavyweight alternatives:
+- **Smaller**: 3 MB binary vs 50+ MB for Electron apps
+- **Faster**: <300ms startup vs multi-second launches
+- **Lighter**: 40-70 MB RAM vs 200+ MB for browser-based tools
+- **Simpler**: Focused interface showing exactly what you need
+- **CLI Integration**: Toggle window from terminal or scripts
+
 ## Requirements
 
 - macOS 13+ (Ventura or later)
 - Compatible with Apple Silicon and Intel Macs
+- Rust toolchain (for building from source)
 
 ## Installation
 
@@ -30,17 +46,22 @@ make install
 
 ### Manual Install
 
-1. **Build the app**:
+1. **Create the app icon** (optional - already included):
+   ```bash
+   ./create_icon.sh
+   ```
+
+2. **Build the app**:
    ```bash
    ./build.sh
    ```
 
-2. **Create the package**:
+3. **Create the package**:
    ```bash
    ./package.sh
    ```
 
-3. **Install**:
+4. **Install**:
    - Drag `dist/memwatch.app` to `/Applications`
    - Create CLI symlink:
      ```bash
@@ -114,11 +135,37 @@ Settings are automatically saved to:
 ~/Library/Application Support/memwatch/settings.json
 ```
 
+## App Icon
+
+The memwatch icon features:
+- **Gradient Design**: Blue gradient background (#4A90E2 → #357ABD)
+- **Letter "M"**: Large white "M" for memwatch
+- **Native Style**: Rounded corners following macOS design guidelines
+- **Retina Support**: All sizes from 16x16 to 1024x1024 (@1x and @2x)
+
+### Regenerating the Icon
+
+If you want to customize the icon:
+
+```bash
+# Requires ImageMagick
+brew install imagemagick
+
+# Generate new icon
+./create_icon.sh
+
+# Rebuild package with new icon
+./package.sh
+```
+
+To use a custom icon, place a 1024x1024 PNG at `/tmp/memwatch_base.png` before running `./create_icon.sh`.
+
 ## Performance
 
 Measured on Apple Silicon MacBook:
 
-- **Binary Size**: ~3-5 MB (release build with LTO and stripping)
+- **Binary Size**: 3.0 MB (release build with LTO and stripping)
+- **Icon Size**: 29 KB (.icns with all sizes)
 - **Memory Usage**: 40-70 MB idle
 - **CPU Usage**: <1-2% idle, ~3-5% during 1s refresh
 - **Startup Time**: <200-300ms cold start
@@ -190,13 +237,16 @@ memory-monitor/
 │   ├── ui.rs         # Main UI and event loop
 │   ├── metrics.rs    # Process and system metrics collection
 │   ├── killer.rs     # Process termination (SIGTERM/SIGKILL)
-│   ├── hotkey.rs     # Global hotkey registration
+│   ├── hotkey.rs     # Global hotkey (placeholder)
 │   ├── ipc.rs        # Unix socket for CLI toggle
 │   └── settings.rs   # Settings persistence
 ├── build.sh          # Build script (with universal binary support)
+├── create_icon.sh    # Generate app icon with gradient and "M"
 ├── package.sh        # Create .app bundle and DMG
 ├── install.sh        # Install to /Applications
-└── Makefile          # Build targets
+├── Makefile          # Build targets
+├── memwatch.icns     # App icon (29 KB, all sizes)
+└── Cargo.toml        # Rust dependencies and build config
 ```
 
 ### Build Commands
@@ -207,6 +257,9 @@ cargo build
 
 # Release build (optimized)
 cargo build --release
+
+# Create icon (requires ImageMagick)
+./create_icon.sh
 
 # Universal binary
 make build
@@ -229,6 +282,9 @@ cargo clippy
 
 # Format code
 cargo fmt
+
+# Verify icon is in bundle
+ls -lh dist/memwatch.app/Contents/Resources/memwatch.icns
 ```
 
 ## Architecture Decisions
@@ -241,20 +297,81 @@ cargo fmt
 
 ## Known Limitations
 
-- Process list limited to top 100 processes (performance)
-- Chart history capped at 300 seconds (memory)
-- Global hotkey disabled (requires migration to objc2 crate for thread safety)
-- No app icons in process list (would increase memory/CPU overhead)
-- No menu bar icon (minimal footprint design choice)
+- **Process list**: Limited to top 100 processes (performance)
+- **Chart history**: Capped at 300 seconds (memory)
+- **Global hotkey**: Disabled (requires migration to objc2 crate for thread safety)
+- **Process icons**: No app icons in process list (would increase memory/CPU overhead)
+- **Menu bar**: No menu bar icon (minimal footprint design choice)
+
+## Technical Details
+
+### Dependencies
+
+Core dependencies (see `Cargo.toml` for full list):
+- **eframe/egui**: Immediate-mode GUI framework (minimal, fast)
+- **egui_plot**: Chart rendering
+- **egui_extras**: Table widget for process list
+- **sysinfo**: Cross-platform system information
+- **libc**: POSIX signals (SIGTERM/SIGKILL)
+- **serde/serde_json**: Settings serialization
+- **directories**: Standard app directories
+
+### Build Optimizations
+
+The `Cargo.toml` includes aggressive size optimizations:
+```toml
+[profile.release]
+opt-level = "z"        # Optimize for size
+lto = true             # Link-time optimization
+codegen-units = 1      # Better optimization
+strip = true           # Remove debug symbols
+panic = "abort"        # Smaller panic handling
+```
+
+Result: 3.0 MB binary (down from ~10+ MB unoptimized)
+
+## Roadmap
+
+Potential future enhancements (contributions welcome):
+
+- [ ] Global hotkey support (migrate to objc2 crate)
+- [ ] Menu bar icon with dropdown
+- [ ] Process tree view
+- [ ] Network I/O monitoring
+- [ ] Disk I/O stats per process
+- [ ] Export metrics to CSV/JSON
+- [ ] Custom alert thresholds
+- [ ] Process favorites/pinning
+- [ ] App icon display in process list
+
+## Contributing
+
+This is a personal project, but contributions are welcome!
+
+**How to contribute:**
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `cargo fmt` and `cargo clippy`
+5. Submit a pull request
+
+**Bug reports and feature requests** are welcome via GitHub Issues.
 
 ## License
 
 This project is provided as-is for personal use.
 
-## Contributing
+MIT License - see LICENSE file for details.
 
-This is a personal project, but feedback and bug reports are welcome via GitHub Issues.
+## Acknowledgments
+
+Built with:
+- **[Rust](https://www.rust-lang.org/)** - Systems programming language
+- **[egui](https://github.com/emilk/egui)** - Immediate-mode GUI framework
+- **[sysinfo](https://github.com/GuillaumeGomez/sysinfo)** - System information library
 
 ---
 
 **Built with** ❤️ **using Rust and egui**
+
+*memwatch - Because your Mac deserves a lightweight process monitor*

@@ -42,8 +42,15 @@ A fully functional, ultra-lightweight macOS process monitor in Rust with the fol
    - `build.sh` - Universal binary support (Apple Silicon + Intel)
    - `package.sh` - Creates .app bundle and DMG
    - `install.sh` - Installs to /Applications + CLI symlink
+   - `create_icon.sh` - Generates app icon (29 KB .icns)
    - `Makefile` - Unified targets
    - Optimized for size: 3.0 MB binary
+
+7. **App Icon**
+   - Blue icon (#4A90E2) with all required sizes
+   - Automatically included in app bundle
+   - Generated using native macOS tools (no external dependencies)
+   - 29 KB total size
 
 ### ⚠️ Known Issue: Global Hotkey
 
